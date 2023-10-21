@@ -1,14 +1,22 @@
-use libc::mach_host_self;
-use mach::message::mach_msg_type_number_t;
-
-
-
 use std::io;
 use std::str;
-use mach::kern_return::KERN_SUCCESS;
-use mach::host_info::*;
-use mach::machine::*;
 
+use libc::mach_host_self;
+
+use mach::kern_return::KERN_SUCCESS;
+use mach::host_info::{
+    host_cpu_load_info_data_t,
+    host_info_t,
+    HOST_CPU_LOAD_INFO,
+    HOST_CPU_LOAD_INFO_COUNT
+};
+use mach::machine::{
+    CPU_STATE_MAX,
+    CPU_STATE_IDLE,
+    CPU_STATE_USER,
+    CPU_STATE_SYSTEM
+};
+use mach::message::mach_msg_type_number_t;
 
 static TOPPROC: &str = "/bin/ps -Aceo pid,pcpu,comm -r";
 static FILTER_PATTERN: &str = "com.apple.";

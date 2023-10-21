@@ -1,4 +1,5 @@
 use chrono::prelude::*;
+
 pub struct Clock {
     pub command: String,
 }
@@ -11,7 +12,7 @@ impl Clock {
     }
 
     pub fn update(&mut self) {
-        let t: DateTime<Utc> = Utc::now();
+        let t: DateTime<Local> = Local::now();
         let time = t.format("%H:%M");
         let date = t.format("%a %d. %b");
 
