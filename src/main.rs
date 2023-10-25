@@ -5,16 +5,15 @@ mod clock;
 use std::env;
 use std::process;
 use std::sync::Mutex;
-use std::sync::Arc;
 
 use cpu::CPU;
 use clock::Clock;
-
 use lazy_static::lazy_static;
 
 lazy_static!{
-    static ref G_CPU: Arc<Mutex<Option<CPU>>> = Arc::new(Mutex::new(Some(CPU::new())));
-    static ref G_CLOCK: Arc<Mutex<Option<Clock>>> = Arc::new(Mutex::new(Some(Clock::new())));
+        static ref G_CPU: Mutex<CPU>  = Mutex::new(CPU::new());
+
+        //static ref COUNT : Mutex<u32> = Mutex::new(0);
 }
 
 
@@ -24,6 +23,7 @@ pub extern "C" fn handler(env: sketchybar_rs::Env) {
     let sender = env.get_v_for_c("SENDER");
     let info = env.get_v_for_c("INFO");
     let selected = env.get_v_for_c("SELECTED");
+    //let mut cpu = CPU::new();
 
     if selected.len() > 0 {
         // Space items
@@ -47,10 +47,14 @@ pub extern "C" fn handler(env: sketchybar_rs::Env) {
         sketchybar_rs::message(&command).unwrap();
     } else if sender == "routine" || sender == "forced" {
         // CPU and Clock routine updates
-        let mut temp_cpu = G_CPU.lock().unwrap();
-        let cpu = temp_cpu.as_mut().unwrap();
-        let mut temp_clock = G_CLOCK.lock().unwrap();
-        let clock = temp_clock.as_mut().unwrap();
+        let mut cpu = G_CPU.lock().unwrap();
+        // if *COUNT.lock().unwrap() == 5 {
+        //     *G_CPU.lock().unwrap() = CPU::new();
+        // }
+        // else {
+        //     *COUNT.lock().unwrap() += 1;
+        // }
+        let mut clock = Clock::new();
         cpu.update();
         clock.update();
 
@@ -58,8 +62,13 @@ pub extern "C" fn handler(env: sketchybar_rs::Env) {
             let command = format!("{} {}", cpu.command, clock.command);
             let _ = sketchybar_rs::message(&command);
         }
-        drop(temp_clock);
-        drop(temp_cpu);
+        else if !clock.command.is_empty() {
+            let _ = sketchybar_rs::message(&clock.command);
+            println!("Clock is working");
+        }
+        else {
+            println!("Nothing is working lol");
+        }
     }
 }
 
@@ -74,7 +83,5 @@ fn main() {
 
     let bootstrap_name = args.next().unwrap();
     sketchybar_rs::server_begin(handler, &bootstrap_name);
-    G_CPU.lock().unwrap().take();
-    G_CLOCK.lock().unwrap().take();
 }
 

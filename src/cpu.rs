@@ -21,7 +21,6 @@ use mach::message::mach_msg_type_number_t;
 static TOPPROC: &str = "/bin/ps -Aceo pid,pcpu,comm -r";
 static FILTER_PATTERN: &str = "com.apple.";
 
-#[derive()]
 pub struct CPU {
     pub host: mach::mach_types::host_t,
     pub count: mach_msg_type_number_t,
@@ -34,7 +33,7 @@ pub struct CPU {
 impl CPU {
     pub fn new() -> Self {
         CPU {
-            host: unsafe{ mach_host_self()},
+            host: unsafe{ mach_host_self() },
             count: HOST_CPU_LOAD_INFO_COUNT,
             load: host_cpu_load_info_data_t {
                 cpu_ticks: [0; CPU_STATE_MAX as usize],
@@ -63,17 +62,17 @@ impl CPU {
         }
 
         if self.has_prev_load {
-            let delta_user = self.load.cpu_ticks[CPU_STATE_USER as usize]
-                - self.prev_load.cpu_ticks[CPU_STATE_USER as usize];
+            let delta_user = self.load.cpu_ticks[CPU_STATE_USER as usize] as f32
+                - self.prev_load.cpu_ticks[CPU_STATE_USER as usize] as f32;
 
-            let delta_system = self.load.cpu_ticks[CPU_STATE_SYSTEM as usize]
-                - self.prev_load.cpu_ticks[CPU_STATE_SYSTEM as usize];
+            let delta_system = self.load.cpu_ticks[CPU_STATE_SYSTEM as usize] as f32
+                - self.prev_load.cpu_ticks[CPU_STATE_SYSTEM as usize] as f32;
 
-            let delta_idle = self.load.cpu_ticks[CPU_STATE_IDLE as usize]
-                - self.prev_load.cpu_ticks[CPU_STATE_IDLE as usize];
+            let delta_idle = self.load.cpu_ticks[CPU_STATE_IDLE as usize] as f32
+                - self.prev_load.cpu_ticks[CPU_STATE_IDLE as usize] as f32;
 
-            let user_perc = delta_user as f64 / (delta_system as f64 + delta_user as f64 + delta_idle as f64);
-            let sys_perc = delta_system as f64 / (delta_system as f64 + delta_user as f64 + delta_idle as f64);
+            let user_perc = delta_user / (delta_system + delta_user + delta_idle);
+            let sys_perc = delta_system / (delta_system + delta_user + delta_idle);
             let total_perc = user_perc + sys_perc;
 
             let top_proc = match get_top_process(TOPPROC, FILTER_PATTERN) {

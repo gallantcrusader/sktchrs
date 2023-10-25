@@ -16,6 +16,5 @@ fn get_top_process(command: &str, filter_pattern: &str) -> Result<String, io::Er
         .splitn(2, filter_pattern)
         .last()
         .unwrap_or(top_process);
-
     Ok(top_process.to_string())
 }
