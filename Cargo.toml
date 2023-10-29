@@ -9,5 +9,5 @@ edition = "2021"
 chrono = { version = "0.4.31", features = ["clock"] }
 lazy_static = "1.4.0"
 libc = "0.2.149"
-mach = {path = "../mach/"}
-sketchybar-rs = {path = "../sketchybar-rs/"}
+mach = { git = "https://github.com/gallantcrusasder/mach.git"}
+sketchybar-rs = {path = "https://github.com/gallantcrusasder/sketchybar-rs.git"}
